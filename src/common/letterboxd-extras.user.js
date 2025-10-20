@@ -558,6 +558,10 @@ if (isChrome)
 		.extras-lost-filter span i {
     		pointer-events:none;
 		}
+		/* Hide all ratings option - hides both native Letterboxd ratings and all extension-added ratings */
+		body.hide-all-ratings .ratings-histogram-chart {
+			display: none !important;
+		}
 	`);
 	/* eslint-enable */
 
@@ -715,9 +719,10 @@ if (isChrome)
 
 				// Determine mobile
 				if (this.isMobile == null) {
-					if (document.querySelector("html")) {
-						var htmlEl = document.querySelector("html");
-						if (htmlEl.getAttribute("class").includes("no-mobile")) {
+					var htmlEl = document.querySelector("html");
+					if (htmlEl) {
+						var classAttr = htmlEl.getAttribute("class");
+						if (classAttr && classAttr.includes("no-mobile")) {
 							this.isMobile = false;
 						} else {
 							this.isMobile = true;
@@ -760,6 +765,26 @@ if (isChrome)
 						this.altTitleError = true;
 						console.error('Letterboxd Extras | Error! There was an error when collecting the alternate titles!\nException:\n' + error);
 					}
+				}
+
+				// Hide all ratings feature (Letterboxd native + IMDB + Rotten Tomatoes + all extension ratings)
+				// This adds/removes a CSS class on body that hides all .ratings-histogram-chart elements
+				try {
+					var bodyElement = document.body;
+					if (bodyElement && bodyElement.classList) {
+						var hideRatings = letterboxd.storage.get('hide-letterboxd-ratings');
+						if (hideRatings === true) {
+							if (!bodyElement.classList.contains('hide-all-ratings')) {
+								bodyElement.classList.add('hide-all-ratings');
+							}
+						} else {
+							if (bodyElement.classList.contains('hide-all-ratings')) {
+								bodyElement.classList.remove('hide-all-ratings');
+							}
+						}
+					}
+				} catch (error) {
+					// Silently ignore errors when DOM is not ready (init() is called by MutationObserver)
 				}
 
 				// Replace 'Fans' with rating count
@@ -5299,9 +5324,10 @@ if (isChrome)
 
 				// Determine mobile
 				if (this.isMobile == null) {
-					if (document.querySelector("html")) {
-						var htmlEl = document.querySelector("html");
-						if (htmlEl.getAttribute("class").includes("no-mobile")) {
+					var htmlEl = document.querySelector("html");
+					if (htmlEl) {
+						var classAttr = htmlEl.getAttribute("class");
+						if (classAttr && classAttr.includes("no-mobile")) {
 							this.isMobile = false;
 						} else {
 							this.isMobile = true;
@@ -7461,11 +7487,11 @@ if (isChrome)
 
 		if (window.location.hostname === 'letterboxd.com') {
 			if (window.location.pathname.startsWith('/film/') && !window.location.pathname.includes("ratings")) {
-				letterboxd.overview.init();
+				letterboxd.overview.init().catch(() => {});
 			}
 			else if (window.location.pathname.startsWith('/search/')) {
 				if (letterboxd.storage.get('search-redirect') === true) {
-					letterboxd.search.init();
+					letterboxd.search.init().catch(() => {});
 				}
 			} else if (window.location.pathname.startsWith('/actor/') ||
 				window.location.pathname.startsWith('/director/') ||
@@ -7491,7 +7517,7 @@ if (isChrome)
 				window.location.pathname.startsWith('/hairstyling/') ||
 				window.location.pathname.startsWith('/choreography/')
 			) {
-				letterboxd.person.init();
+				letterboxd.person.init().catch(() => {});
 			}
 		}
 	});
