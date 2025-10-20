@@ -562,6 +562,28 @@ if (isChrome)
 		body.hide-all-ratings .ratings-histogram-chart {
 			display: none !important;
 		}
+		/* Show ratings button */
+		.show-ratings-button {
+			display: inline-block;
+			padding: 8px 16px;
+			margin: 10px 0;
+			background-color: #2c3440;
+			border: 1px solid #456;
+			border-radius: 4px;
+			color: #9ab;
+			font-size: 13px;
+			cursor: pointer;
+			text-align: center;
+			transition: background-color 0.2s, border-color 0.2s;
+		}
+		.show-ratings-button:hover {
+			background-color: #3a4553;
+			border-color: #678;
+			color: #abc;
+		}
+		body:not(.hide-all-ratings) .show-ratings-button {
+			display: none;
+		}
 	`);
 	/* eslint-enable */
 
@@ -587,6 +609,7 @@ if (isChrome)
 			scoreConverted: false,
 			fansConverted: false,
 			showDetailsAdded: false,
+			ratingsRevealed: false,
 			titleError: false,
 
 			idsCollected: false,
@@ -769,15 +792,37 @@ if (isChrome)
 
 				// Hide all ratings feature (Letterboxd native + IMDB + Rotten Tomatoes + all extension ratings)
 				// This adds/removes a CSS class on body that hides all .ratings-histogram-chart elements
+				// and shows a "Show Ratings" button to temporarily reveal them
 				try {
 					var bodyElement = document.body;
 					if (bodyElement && bodyElement.classList) {
 						var hideRatings = letterboxd.storage.get('hide-letterboxd-ratings');
-						if (hideRatings === true) {
+						if (hideRatings === true && !this.ratingsRevealed) {
+							// Add class to hide ratings (only if user hasn't clicked to reveal them)
 							if (!bodyElement.classList.contains('hide-all-ratings')) {
 								bodyElement.classList.add('hide-all-ratings');
 							}
-						} else {
+
+							// Create "Show Ratings" button if it doesn't exist
+							var sidebar = document.querySelector('.sidebar');
+							if (sidebar && !document.querySelector('.show-ratings-button')) {
+								var showButton = letterboxd.helpers.createElement('div', {
+									class: 'show-ratings-button'
+								});
+								showButton.innerText = 'Show Ratings';
+
+								// Add click handler to reveal ratings
+								var self = this;
+								showButton.addEventListener('click', function() {
+									bodyElement.classList.remove('hide-all-ratings');
+									self.ratingsRevealed = true;
+								});
+
+								// Insert button at the bottom of sidebar (where ratings are)
+								sidebar.appendChild(showButton);
+							}
+						} else if (hideRatings !== true) {
+							// Remove class to show ratings (option is disabled)
 							if (bodyElement.classList.contains('hide-all-ratings')) {
 								bodyElement.classList.remove('hide-all-ratings');
 							}
