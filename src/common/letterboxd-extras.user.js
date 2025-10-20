@@ -838,8 +838,8 @@ if (isChrome)
 								// Insert button at the bottom of sidebar (where ratings are)
 								sidebar.appendChild(showButton);
 							}
-						} else if (!shouldHide) {
-							// Remove class to show ratings
+						} else {
+							// Remove class to show ratings (if not hiding)
 							if (bodyElement.classList.contains('hide-all-ratings')) {
 								bodyElement.classList.remove('hide-all-ratings');
 							}
