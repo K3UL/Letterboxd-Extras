@@ -167,7 +167,7 @@ async function InitDefaultSettings() {
     if (options['open-same-tab'] == null) options['open-same-tab'] = false;
     if (options['replace-fans'] == null) options['replace-fans'] = "false";
     if (options['hide-ratings-enabled'] == null) options['hide-ratings-enabled'] = false;
-    if (options['hide-letterboxd-ratings'] == null) options['hide-letterboxd-ratings'] = false;
+    if (options['hide-letterboxd-ratings'] == null) options['hide-letterboxd-ratings'] = "show";
     if (options['tooltip-show-details'] == null) options['tooltip-show-details'] = false;
     if (options['google'] == null) options['google'] = false;
     if (options['boxoffice-enabled'] == null) options['boxoffice-enabled'] = false;
@@ -181,6 +181,12 @@ async function InitDefaultSettings() {
         options["convert-ratings"] = "5";
     }
 
+    // Migrate old hide-letterboxd-ratings from boolean to string
+    if (options["hide-letterboxd-ratings"] === true) {
+        options["hide-letterboxd-ratings"] = "hide";
+    } else if (options["hide-letterboxd-ratings"] === false) {
+        options["hide-letterboxd-ratings"] = "show";
+    }
 
     // Save
     await browser.storage.sync.set({ options });

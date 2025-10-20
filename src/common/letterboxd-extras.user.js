@@ -793,11 +793,28 @@ if (isChrome)
 				// Hide all ratings feature (Letterboxd native + IMDB + Rotten Tomatoes + all extension ratings)
 				// This adds/removes a CSS class on body that hides all .ratings-histogram-chart elements
 				// and shows a "Show Ratings" button to temporarily reveal them
+				// Supports 3 modes: "show" (always show), "hide" (always hide), "hide-if-not-rated" (hide if user hasn't rated)
 				try {
 					var bodyElement = document.body;
 					if (bodyElement && bodyElement.classList) {
-						var hideRatings = letterboxd.storage.get('hide-letterboxd-ratings');
-						if (hideRatings === true && !this.ratingsRevealed) {
+						var hideRatingsOption = letterboxd.storage.get('hide-letterboxd-ratings');
+						var shouldHide = false;
+
+						// Determine if we should hide ratings based on the option
+						if (hideRatingsOption === "hide") {
+							// Always hide
+							shouldHide = true;
+						} else if (hideRatingsOption === "hide-if-not-rated") {
+							// Hide only if user hasn't rated the movie
+							// Check if user has rated (look for "Remove rating" link which only appears when rated)
+							var userRating = document.querySelector('.remove-sidebar-rating');
+							if (!userRating) {
+								shouldHide = true;
+							}
+						}
+						// If hideRatingsOption === "show" or anything else, shouldHide stays false
+
+						if (shouldHide && !this.ratingsRevealed) {
 							// Add class to hide ratings (only if user hasn't clicked to reveal them)
 							if (!bodyElement.classList.contains('hide-all-ratings')) {
 								bodyElement.classList.add('hide-all-ratings');
@@ -821,8 +838,8 @@ if (isChrome)
 								// Insert button at the bottom of sidebar (where ratings are)
 								sidebar.appendChild(showButton);
 							}
-						} else if (hideRatings !== true) {
-							// Remove class to show ratings (option is disabled)
+						} else if (!shouldHide) {
+							// Remove class to show ratings
 							if (bodyElement.classList.contains('hide-all-ratings')) {
 								bodyElement.classList.remove('hide-all-ratings');
 							}

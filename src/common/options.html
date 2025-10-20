@@ -350,8 +350,12 @@
             <input type="checkbox" id="hide-ratings-enabled" class="setting"/>
         </div>
         <div>
-            <label for="hide-letterboxd-ratings">Hide all ratings (Letterboxd + IMDB + Rotten Tomatoes + etc.):</label>
-            <input type="checkbox" id="hide-letterboxd-ratings" class="setting"/>
+            <label for="hide-letterboxd-ratings">Ratings visibility:</label>
+            <select id="hide-letterboxd-ratings" class="setting">
+                <option value="show">Always show ratings</option>
+                <option value="hide">Always hide ratings</option>
+                <option value="hide-if-not-rated">Hide if I haven't rated the movie</option>
+            </select>
         </div>
         <div>
             <label for="tooltip-show-details">Display tooltips on page:</label>
